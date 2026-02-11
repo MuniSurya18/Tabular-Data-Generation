@@ -67,7 +67,24 @@ if page == "Dashboard":
     c3.metric("Status", "Ready")
     
     st.markdown("### Quick Start")
-    st.info("Upload data in **Data Explorer** -> Train in **Train Model** -> Generate.")
+    st.info("Start by uploading or selecting a dataset in the **Data Explorer**.")
+    
+    # Navigation Shortcuts
+    st.markdown("### Quick Navigation")
+    col1, col2, col3 = st.columns(3)
+    if col1.button("📂 Go to Data Explorer"):
+        # We can't switch radio programmatically easily in vanilla streamlit without session state tricks
+        # But we can tell the user to click the sidebar, or use a query param
+        st.experimental_set_query_params(page="Data Explorer")
+        st.write("Please select 'Data Explorer' in the sidebar.")
+    
+    if col2.button("🚂 Go to Train Model"):
+        st.write("Please select 'Train Model' in the sidebar.")
+        
+    if col3.button("✨ Go to Generate"):
+        st.write("Please select 'Generate Data' in the sidebar.")
+        
+    # Visualization Placeholder
 
 elif page == "Data Explorer":
     st.title("Data Explorer")
