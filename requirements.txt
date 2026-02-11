@@ -1,0 +1,11 @@
+
+# Install PyTorch with CPU support to avoid path length issues on Windows
+# pip install torch --index-url https://download.pytorch.org/whl/cpu
+numpy
+pandas
+scikit-learn
+tqdm
+pypdf  # If we need to process pdfs again
+matplotlib
+seaborn
+category_encoders
