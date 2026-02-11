@@ -8,9 +8,7 @@ env/
 venv/
 .env
 .ipynb_checkpoints/
-data/
 checkpoints/
 generated_data.csv
 pdf_content.txt
 extract_pdf.py
-

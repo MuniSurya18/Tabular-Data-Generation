@@ -1,4 +1,3 @@
-
 # Tabular Data Generation with DSDDPM
 
 This repository contains the implementation of the **Dual-Scale Diffusion Probabilistic Model (DSDDPM)** for generating synthetic tabular data. This model is designed to capture both global dependencies (coarse-scale) and local details (fine-scale) using a dual-branch diffusion process.
@@ -20,35 +19,27 @@ This repository contains the implementation of the **Dual-Scale Diffusion Probab
    ```bash
    pip install -r requirements.txt
    ```
+   *Note: On Windows systems with strict path limits, you may encounter issues installing `torch`. We recommend using the provided Colab Notebook.*
 
 ## Usage
 
-### 1. Prepare Data
-Prepare your dataset as a CSV file. The script automatically detects numerical and categorical columns (simple heuristic), or you can modify `src/data.py` to specify them.
+### Run on Google Colab (Recommended)
+Open `DSDDPM_Colab.ipynb` in Google Colab (upload it or open from GitHub) to run the training and generation without local setup issues.
 
-To generate dummy data for testing:
-```bash
-python scripts/generate_synthetic.py
-```
+### Local Usage
 
-### 2. Train the Model
-Train the DSDDPM model on your dataset:
-```bash
-python -m src.train --data data/dummy.csv --epochs 100 --batch_size 64
-```
-Checkpoints will be saved in `checkpoints/`.
+1. **Prepare Data**
+   ```bash
+   python scripts/generate_synthetic.py
+   ```
 
-### 3. Generate Synthetic Data
-Generate new samples using a trained checklist:
-```bash
-python -m src.sample --model checkpoints/model_final.pt --data data/dummy.csv --output generated.csv --num_samples 1000
-```
+2. **Train the Model**
+   ```bash
+   python -m src.train --data data/dummy.csv --epochs 100 --batch_size 64
+   ```
+   Checkpoints will be saved in `checkpoints/`.
 
-## Structure
-- `src/diffusion.py`: Core DSDDPM logic (Forward/Reverse processes).
-- `src/modules.py`: Neural Network architecture (Dual-Branch MLP).
-- `src/data.py`: Data loading and preprocessing (Quantile Transform, Label Encoding).
-- `src/train.py`: Training loop.
-
-## References
-Based on the paper "Enhancing Tabular Data Generation With Dual-Scale Noise Modeling" by Zhang et al.
+3. **Generate Synthetic Data**
+   ```bash
+   python -m src.sample --model checkpoints/model_final.pt --data data/dummy.csv --output generated.csv --num_samples 1000
+   ```
