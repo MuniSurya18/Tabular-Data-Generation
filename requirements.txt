@@ -9,4 +9,7 @@ tqdm
 pypdf  # If we need to process pdfs again
 matplotlib
 seaborn
-category_encoders
+streamlit
+plotly
+altair
+pyngrok

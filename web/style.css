@@ -1,0 +1,104 @@
+/* Main App Styling - Dark Gradient Theme */
+.stApp {
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    color: #e0e0e0;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+/* Sidebar Glassmorphism */
+section[data-testid="stSidebar"] {
+    background-color: rgba(20, 20, 35, 0.7);
+    backdrop-filter: blur(15px);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Headers */
+h1,
+h2,
+h3 {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    font-weight: 700 !important;
+    font-family: 'Inter', sans-serif;
+}
+
+h1 {
+    background: -webkit-linear-gradient(45deg, #00d2ff, #3a7bd5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Buttons - Premium Gradient */
+.stButton>button {
+    background: linear-gradient(92.88deg, #455EB5 9.16%, #5643CC 43.89%, #673FD7 64.72%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.stButton>button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 14px rgba(0, 0, 0, 0.3), 0 0 15px rgba(103, 63, 215, 0.4);
+}
+
+.stButton>button:active {
+    transform: translateY(0);
+}
+
+/* Cards/Containers */
+div[data-testid="stMetricValue"] {
+    font-size: 2rem !important;
+    color: #00d2ff !important;
+}
+
+div[data-testid="metric-container"] {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+div[data-testid="metric-container"]:hover {
+    transform: translateY(-5px);
+    border-color: rgba(0, 210, 255, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Inputs */
+.stTextInput>div>div>input {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+}
+
+.stTextInput>div>div>input:focus {
+    border-color: #455EB5;
+    box-shadow: 0 0 8px rgba(69, 94, 181, 0.3);
+}
+
+/* Charts */
+.js-plotly-plot .plotly .modebar {
+    display: none !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    background: #0f0c29;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
