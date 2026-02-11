@@ -1,6 +1,7 @@
 
-# Install PyTorch with CPU support to avoid path length issues on Windows
+# Install PyTorch with CPU support to avoid path length issues on Windows:
 # pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.0.0
 numpy
 pandas
 scikit-learn
