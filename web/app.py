@@ -73,7 +73,16 @@ elif page == "Data Explorer":
     st.title("Data Explorer")
     uploaded = st.file_uploader("Upload CSV", type="csv")
     if uploaded:
-        df = pd.read_csv(uploaded)
+        # Save uploaded file
+        root = get_project_root()
+        data_dir = os.path.join(root, "data")
+        os.makedirs(data_dir, exist_ok=True)
+        save_path = os.path.join(data_dir, uploaded.name)
+        with open(save_path, "wb") as f:
+            f.write(uploaded.getbuffer())
+        st.success(f"Saved {uploaded.name} to data/")
+        
+        df = pd.read_csv(save_path)
         st.dataframe(df.head())
     else:
         root = get_project_root()
@@ -116,6 +125,13 @@ elif page == "Train Model":
                 if process.returncode == 0:
                     st.success("Training Complete!")
                     st.code(stdout)
+                    
+                    # Show download for latest model
+                    ckpt_dir = os.path.join(root, "checkpoints")
+                    latest_model = os.path.join(ckpt_dir, "model_final.pt")
+                    if os.path.exists(latest_model):
+                        with open(latest_model, "rb") as f:
+                            st.download_button("Download Trained Model", f, file_name="model_final.pt")
                 else:
                     st.error("Training Failed")
                     st.error(stderr)
@@ -131,31 +147,45 @@ elif page == "Generate Data":
         data_dir = os.path.join(root, "data")
         datasets = [f for f in os.listdir(data_dir) if f.endswith(".csv")] if os.path.exists(data_dir) else []
         
-        selected_model = st.selectbox("Model", models)
-        base_data = st.selectbox("Base Schema", datasets)
+        c1, c2 = st.columns(2)
+        with c1:
+            selected_model = st.selectbox("Model", models)
+        with c2:
+            base_data = st.selectbox("Base Schema", datasets)
+            
         num = st.number_input("Samples", 10, 5000, 100)
+        out_name = st.text_input("Output Name", "generated_data.csv")
         
         if st.button("Generate"):
             model_path = os.path.join(ckpt_dir, selected_model)
             data_path = os.path.join(data_dir, base_data)
-            cmd = [sys.executable, "-m", "src.sample", "--model", model_path, "--data", data_path, "--num_samples", str(num)]
+            cmd = [sys.executable, "-m", "src.sample", "--model", model_path, "--data", data_path, "--num_samples", str(num), "--output", out_name]
             
             with st.spinner("Generating..."):
                 res = subprocess.run(cmd, cwd=root, capture_output=True, text=True)
                 if res.returncode == 0:
                     st.success("Done!")
-                    if os.path.exists(os.path.join(root, "generated_data.csv")):
-                        df = pd.read_csv(os.path.join(root, "generated_data.csv"))
+                    out_path = os.path.join(root, out_name)
+                    if os.path.exists(out_path):
+                        df = pd.read_csv(out_path)
                         st.dataframe(df.head())
+                        
+                        csv = df.to_csv(index=False).encode('utf-8')
+                        st.download_button("Download CSV", csv, "generated.csv", "text/csv")
+                        
+                        # Download Model Button
+                        with open(model_path, "rb") as f:
+                            st.download_button("Download Used Model (.pt)", f, file_name=selected_model)
                 else:
                     st.error("Failed")
                     st.error(res.stderr)
 
 elif page == "Comparisons & Viz":
-    st.title("Visualization")
+    st.title("Visualization & Privacy Analysis")
     root = get_project_root()
     files = [f for f in os.listdir(root) if f.endswith(".csv")]
-    sel = st.multiselect("Select Files", files)
+    sel = st.multiselect("Select Files (Select Real then Generated)", files, max_selections=2)
+    
     if len(sel) > 0:
         dfs = []
         for f in sel:
@@ -164,8 +194,53 @@ elif page == "Comparisons & Viz":
             dfs.append(d)
         combined = pd.concat(dfs)
         
+        st.subheader("Distribution Comparison")
         col = st.selectbox("Column", combined.columns)
         if combined[col].dtype == 'object':
              st.plotly_chart(px.histogram(combined, x=col, color='Source', barmode='group'))
         else:
              st.plotly_chart(px.histogram(combined, x=col, color='Source',  opacity=0.7, barmode='overlay'))
+
+    # Privacy Analysis
+    if len(sel) == 2:
+        st.subheader("Privacy: Distance to Closest Record (DCR)")
+        if st.checkbox("Run Privacy Check (DCR)"):
+            try:
+                from sklearn.preprocessing import StandardScaler
+                from sklearn.metrics import pairwise_distances
+                
+                real_name = sel[0]
+                gen_name = sel[1]
+                
+                df_real = pd.read_csv(os.path.join(root, real_name)).select_dtypes(include=['number']).dropna()
+                df_gen = pd.read_csv(os.path.join(root, gen_name)).select_dtypes(include=['number']).dropna()
+                
+                if df_real.empty or df_gen.empty:
+                    st.warning("Needs numerical data for DCR check.")
+                else:
+                    # Normalize
+                    scaler = StandardScaler()
+                    scaler.fit(df_real)
+                    
+                    real_scaled = scaler.transform(df_real)
+                    gen_scaled = scaler.transform(df_gen)
+                    
+                    # Compute distances
+                    # For each gen point, find min dist to real
+                    dists = pairwise_distances(gen_scaled, real_scaled)
+                    min_dists = dists.min(axis=1)
+                    
+                    st.write(f"Mean DCR: {min_dists.mean():.4f}")
+                    st.write(f"Min DCR: {min_dists.min():.4f} (Lower = closer to real data)")
+                    
+                    fig_dcr = px.histogram(min_dists, nbins=30, title="Distribution of Distances to Nearest Real Record")
+                    fig_dcr.update_layout(xaxis_title="Distance", yaxis_title="Count")
+                    st.plotly_chart(fig_dcr)
+                    
+                    if min_dists.min() < 0.01:
+                        st.warning("⚠️ Some generated records are very close to real records. High privacy risk!")
+                    else:
+                        st.success("✅ Good separation from real records.")
+                        
+            except ImportError:
+                st.error("Sklearn not available for privacy check.")
