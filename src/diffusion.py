@@ -242,7 +242,9 @@ class DSDDPM(nn.Module):
                     # I'll implement a very simple "Analytic" step:
                     # Just sample x_0_hat from probs.
                     # Then q_sample to t-1.
-                    x_cat_val = self.q_sample_cat(x_0_hat.unsqueeze(1), t-1, [cat_dims[i]]).squeeze(1)
+                    # Fix: Ensure t is a tensor for q_sample_cat
+                    t_prev_batch = torch.full((num_samples,), t-1, device=self.device, dtype=torch.long)
+                    x_cat_val = self.q_sample_cat(x_0_hat.unsqueeze(1), t_prev_batch, [cat_dims[i]]).squeeze(1)
                 
                 new_x_cat_list.append(x_cat_val)
             
